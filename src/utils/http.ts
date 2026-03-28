@@ -16,7 +16,8 @@ class Http {
         })
         this.instance.interceptors.request.use(
             (config) => {
-                if (this.token) config.headers['Authorization'] = `Bearer ${this.token}`
+                const token = localStorage.getItem('accessToken')
+                if (token) config.headers['Authorization'] = `Bearer ${token}`
                 return config
             },
             (error) => {
@@ -25,8 +26,8 @@ class Http {
         )
         this.instance.interceptors.response.use(
             (response) => {
-                if (response.config.url === 'auth/sign-in') {
-                    this.token = response?.data.data.accessToken
+                if (response.config.url === 'auth/login') {
+                    this.token = response?.data.data.access_token
                     window.localStorage.setItem('accessToken', this.token as string)
                 } else if (response.config.url === 'sign-out') {
                     this.token = ''
@@ -37,8 +38,7 @@ class Http {
                 return response;
             },
             (error) => {
-                const data = error.response.data;
-                const message = data.message || error.message
+                const message = error.response?.data?.message || error.message
                 toast.error(message)
                 return Promise.reject(error)
             }

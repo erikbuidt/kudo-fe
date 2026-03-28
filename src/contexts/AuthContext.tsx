@@ -3,13 +3,13 @@ import { createContext, type ReactNode, useMemo, useState } from "react";
 interface AuthContextInterface {
     isAuthenticated: boolean
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
-    resetAuthenticated: () => void
+    resetAuthenticated: () => void,
 }
 
 const AuthContext = createContext<AuthContextInterface>({
     isAuthenticated: !!window.localStorage.getItem('accessToken'),
     setIsAuthenticated: () => null,
-    resetAuthenticated: () => null
+    resetAuthenticated: () => null,
 })
 
 interface Props {
@@ -25,7 +25,8 @@ const AuthProvider = ({ children }: Props) => {
         () => ({
             isAuthenticated,
             setIsAuthenticated,
-            resetAuthenticated
+            resetAuthenticated,
+
         }),
         [isAuthenticated]
     )

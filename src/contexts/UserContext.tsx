@@ -1,26 +1,34 @@
 import { useMe } from "@/hooks/useUsers";
 import type { KudoUser } from "@/types/kudo.type";
 import { createContext, type ReactNode, useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserContextInterface {
     me: KudoUser | undefined,
+    isAuthenticated: boolean,
+    refetch: () => void
 }
 
 const UserContext = createContext<UserContextInterface>({
     me: undefined,
+    isAuthenticated: false,
+    refetch: () => { }
 })
 
 interface Props {
     children?: ReactNode
 }
 const UserProvider = ({ children }: Props) => {
-    const { data: me } = useMe();
+    const { isAuthenticated } = useAuth();
+    const { data: me, refetch } = useMe();
 
     const value = useMemo(
         () => ({
-            me
+            me,
+            isAuthenticated,
+            refetch: () => { refetch() }
         }),
-        [me]
+        [me, isAuthenticated, refetch]
     )
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }

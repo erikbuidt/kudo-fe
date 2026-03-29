@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { config } from '@/constants/config';
 import { useQueryClient } from '@tanstack/react-query';
@@ -23,16 +23,18 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const { me } = useContext(UserContext)
+    const { me, isAuthenticated } = useContext(UserContext)
     const queryClient = useQueryClient();
 
     // Use a ref to keep track of 'me' without re-triggering the useEffect
-    const meRef = React.useRef(me);
+    const meRef = useRef(me);
     useEffect(() => {
         meRef.current = me;
     }, [me]);
 
     useEffect(() => {
+        if (!isAuthenticated) return;
+        
         const token = localStorage.getItem('accessToken');
         if (!token) return;
 
@@ -86,7 +88,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return () => {
             newSocket.close();
         };
-    }, [queryClient]);
+    }, [queryClient, isAuthenticated]);
 
     return (
         <SocketContext.Provider value={{ socket, isConnected }}>

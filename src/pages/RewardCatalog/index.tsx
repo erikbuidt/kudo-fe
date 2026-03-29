@@ -10,7 +10,7 @@ import type { Reward, Redemption } from '@/types/reward.type'
 
 export default function RewardCatalog() {
     const [view, setView] = useState<'catalog' | 'my-redemptions'>('catalog')
-    const { data: user, isLoading: isLoadingUser } = useMe()
+    const { data: user } = useMe()
     const { data: rewards = [], isLoading: isLoadingRewards } = useRewards()
     const { data: myRedemptions = [], isLoading: isLoadingRedemptions } = useMyRedemptions()
 

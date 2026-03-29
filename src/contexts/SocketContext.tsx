@@ -29,7 +29,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         if (!token) return;
 
         // Initialize socket with /notifications namespace
-        const newSocket = io(`${config.BASE_URL}/notifications`, {
+        // If BASE_URL is relative (like /api), we should connect to the current host
+        const socketUrl = config.BASE_URL.startsWith('http') 
+            ? `${config.BASE_URL}/notifications` 
+            : '/notifications';
+
+        const newSocket = io(socketUrl, {
             auth: { token },
             transports: ['websocket'],
         });
@@ -60,7 +65,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         });
 
         // Listen for personal notifications
-        newSocket.on('notification', (payload) => {
+        newSocket.on('notification', () => {
             queryClient.invalidateQueries({ queryKey: notificationKeys.unreadCount() });
             queryClient.invalidateQueries({ queryKey: notificationKeys.all });
 

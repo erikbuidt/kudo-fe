@@ -1,4 +1,4 @@
-import { Filter, Image as ImageIcon, Paperclip, Smile, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { KudosFeedPost } from '@/components/KudosFeedPost'
 import { useKudos, useTopCoreValues } from '@/hooks/useKudos'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'

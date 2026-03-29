@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Gift, User } from 'lucide-react'
+import { Home, Gift } from 'lucide-react'
 import { path } from '@/routes/path'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useMe } from '@/hooks/useUsers';

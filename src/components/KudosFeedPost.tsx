@@ -11,8 +11,6 @@ import { useComments, useAddComment } from '@/hooks/useComments'
 import { useUploadMedia } from '@/hooks/useUploadMedia'
 import { cn } from '@/lib/utils'
 import { toast } from 'react-toastify';
-import { useAuth } from '@/hooks/useAuth'
-import { useUsers } from '@/hooks/useUsers'
 import { UserContext } from '@/contexts/UserContext'
 
 interface KudosFeedPostProps {

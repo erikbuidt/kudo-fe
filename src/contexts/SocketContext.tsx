@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { config } from '@/constants/config';
 import { useQueryClient } from '@tanstack/react-query';
 import { kudoKeys } from '@/hooks/useKudos';
 import { notificationKeys } from '@/hooks/useNotifications';
 import { reactionKeys } from '@/hooks/useReactions';
-import { toast } from 'react-toastify';
+import { useAuth } from '@/hooks/useAuth';
+import { userKeys } from '@/hooks/useUsers';
 
 interface SocketContextType {
     socket: Socket | null;
@@ -22,14 +23,20 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
+    const { me } = useAuth();
     const queryClient = useQueryClient();
+
+    // Use a ref to keep track of 'me' without re-triggering the useEffect
+    const meRef = React.useRef(me);
+    useEffect(() => {
+        meRef.current = me;
+    }, [me]);
 
     useEffect(() => {
         const token = localStorage.getItem('accessToken');
         if (!token) return;
 
         // Initialize socket with /notifications namespace
-        // If BASE_URL is relative (like /api), we should connect to the current host
         const socketUrl = config.BASE_URL.startsWith('http')
             ? `${config.BASE_URL}/notifications`
             : '/notifications';
@@ -53,10 +60,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         newSocket.on('kudo_created', (newKudo) => {
             // Invalidate kudos query to fetch fresh data or we could prepend
             queryClient.invalidateQueries({ queryKey: kudoKeys.feed() });
-            toast.info(`🎉 New Kudo from ${newKudo.sender.username}!`, {
-                position: "bottom-right",
-                autoClose: 3000,
-            });
+
+            const currentMe = meRef.current;
+            console.log('Kudo created received. receiver:', newKudo.receiver.id, 'current user:', currentMe?.id);
+            if (newKudo.receiver.id === currentMe?.id) {
+                console.log('User is the receiver, invalidating me query');
+                queryClient.invalidateQueries({ queryKey: userKeys.me });
+            }
         });
 
         // Listen for reaction updates

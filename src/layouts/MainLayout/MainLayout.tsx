@@ -16,7 +16,10 @@ function MainLayout({ children }: Props) {
 
             <div className="flex max-w-[1400px] mx-auto w-full flex-1">
                 {/* Desktop Sidebar */}
-                <Sidebar />
+                <div className='hidden lg:block min-w-[250px]'>
+                    <Sidebar />
+
+                </div>
 
                 {/* Mobile Sidebar (Sheet) */}
                 <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>

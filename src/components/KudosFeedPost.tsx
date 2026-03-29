@@ -9,9 +9,9 @@ import { formatDistanceToNow } from '@/utils/dateUtils'
 import { useReactionSummary, useToggleReaction } from '@/hooks/useReactions'
 import { useComments, useAddComment } from '@/hooks/useComments'
 import { useUploadMedia } from '@/hooks/useUploadMedia'
-import { useMe } from '@/hooks/useUsers'
 import { cn } from '@/lib/utils'
 import { toast } from 'react-toastify';
+import { useAuth } from '@/hooks/useAuth'
 
 interface KudosFeedPostProps {
     kudo: Kudo;
@@ -32,8 +32,7 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
     const [showComments, setShowComments] = useState(defaultShowComments);
     const { data: comments = [], isLoading: isLoadingComments } = useComments(showComments ? id : '');
     const { mutate: addComment, isPending: isSubmitting } = useAddComment();
-    const { data: me } = useMe();
-
+    const { me } = useAuth()
     // Comment form state
     const [text, setText] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -100,9 +99,9 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
                         </Avatar>
                         <div className="min-w-0">
                             <div className="text-xs lg:text-sm leading-tight lg:leading-normal">
-                                <span className="font-bold text-slate-900 truncate">{sender.display_name || sender.username}</span>
+                                <span className="font-bold text-slate-900 truncate">{me?.id === sender.id ? 'You' : sender.display_name || sender.username}</span>
                                 <span className="text-slate-500 mx-1">recognized</span>
-                                <span className="font-bold text-slate-900 truncate">{receiver.display_name || receiver.username}</span>
+                                <span className="font-bold text-slate-900 truncate">{me?.id === receiver.id ? 'You' : receiver.display_name || receiver.username}</span>
                             </div>
                             <div className="text-[10px] lg:text-xs text-slate-400 mt-0.5">{timeAgo}</div>
                         </div>
@@ -146,10 +145,10 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
                             disabled={toggleReaction.isPending}
                             className={cn(
                                 "text-slate-500 hover:text-rose-500 font-semibold gap-2 h-8 px-2 rounded-lg",
-                                totalReactions > 0 && "text-rose-500 bg-rose-50/50"
+                                kudo.is_reacted && "text-rose-500 bg-rose-50/50"
                             )}
                         >
-                            <Heart className={cn("w-4 h-4", totalReactions > 0 && "fill-current")} />
+                            <Heart className={cn("w-4 h-4", kudo.is_reacted && "fill-current")} />
                             {totalReactions > 0 && <span className="text-xs">{totalReactions}</span>}
                         </Button>
 

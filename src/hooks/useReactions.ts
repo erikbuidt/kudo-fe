@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { reactionApi, type ToggleReactionPayload } from '@/apis/reaction.api';
+import { kudoKeys } from './useKudos';
 
 export const reactionKeys = {
     all: ['reactions'] as const,
@@ -24,6 +25,7 @@ export const useToggleReaction = () => {
         mutationFn: (payload: ToggleReactionPayload) => reactionApi.toggleReaction(payload),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: reactionKeys.summary(variables.kudo_id) });
+            queryClient.invalidateQueries({ queryKey: kudoKeys.all });
         },
     });
 };

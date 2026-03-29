@@ -3,18 +3,18 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useRewards, useRedeemReward, useMyRedemptions } from '@/hooks/useRewards'
-import { useMe } from '@/hooks/useUsers'
 import { Loader2 } from 'lucide-react'
 import type { Reward, Redemption } from '@/types/reward.type'
+import { useAuth } from '@/hooks/useAuth'
 
 
 export default function RewardCatalog() {
     const [view, setView] = useState<'catalog' | 'my-redemptions'>('catalog')
-    const { data: user } = useMe()
+    const { me } = useAuth()
     const { data: rewards = [], isLoading: isLoadingRewards } = useRewards()
     const { data: myRedemptions = [], isLoading: isLoadingRedemptions } = useMyRedemptions()
 
-    const availablePoints = user?.received_balance || 0;
+    const availablePoints = me?.received_balance || 0;
 
     return (
         <div className="max-w-5xl">
@@ -120,7 +120,7 @@ function RedeemedItem({ redemption }: { redemption: Redemption }) {
 
 function RewardItem({ reward, userBalance }: { reward: Reward, userBalance: number }) {
     const { mutate: redeem, isPending } = useRedeemReward();
-    const { data: user } = useMe();
+    const { me } = useAuth();
     const canAfford = userBalance >= reward.point_cost;
     const isOutOfStock = reward.stock <= 0;
 
@@ -137,7 +137,7 @@ function RewardItem({ reward, userBalance }: { reward: Reward, userBalance: numb
      */
     const buildIdempotencyKey = async (): Promise<string> => {
         const minuteBucket = Math.floor(Date.now() / 5_000);
-        const raw = `${user?.id}:${reward.point_cost}:${reward.id}:${minuteBucket}`;
+        const raw = `${me?.id}:${reward.point_cost}:${reward.id}:${minuteBucket}`;
         const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
         return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     };

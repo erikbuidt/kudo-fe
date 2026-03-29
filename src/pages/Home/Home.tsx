@@ -6,7 +6,7 @@ import { GiveKudoModal } from '@/components/GiveKudoModal'
 import { useState, useLayoutEffect, useRef } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useMe } from '@/hooks/useUsers'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -20,7 +20,7 @@ export default function Home() {
         isFetchingNextPage
     } = useKudos();
 
-    const { data: user } = useMe();
+    const { me } = useAuth();
 
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 
@@ -61,9 +61,9 @@ export default function Home() {
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
                     <div className="flex gap-3 items-center">
                         <Avatar className="w-10 h-10">
-                            <AvatarImage src={user?.avatar_url} alt={user?.display_name} />
+                            <AvatarImage src={me?.avatar_url} alt={me?.display_name} />
                             <AvatarFallback className="text-[10px]">
-                                {(user?.display_name || user?.username || '').substring(0, 2).toUpperCase()}
+                                {(me?.display_name || me?.username || '').substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
                         <input

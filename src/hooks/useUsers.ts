@@ -23,5 +23,6 @@ export const useMe = () => {
             const response = await userApi.getMe();
             return response.data.data;
         },
+        staleTime: 1000 * 60 * 5,
     });
 };

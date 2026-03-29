@@ -24,6 +24,7 @@ export interface Kudo {
   receiver: KudoUser;
   comments_count?: number;
   reactions_count?: number;
+  is_reacted?: boolean;
 }
 
 export interface CreateKudoPayload {

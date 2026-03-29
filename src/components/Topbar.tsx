@@ -10,13 +10,12 @@ import {
 } from "./ui/popover"
 import { NotificationFeed } from './NotificationFeed'
 import { useUnreadCount } from '../hooks/useNotifications'
-import { useMe } from '../hooks/useUsers'
-import { useLogout } from '@/hooks/useAuth'
+import { useAuth, useLogout } from '@/hooks/useAuth'
 
 export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { data: unreadCount = 0 } = useUnreadCount();
-    const { data: user } = useMe();
+    const { me } = useAuth();
     const logout = useLogout();
 
     const handleLogOut = () => {
@@ -50,11 +49,11 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
             <div className="flex items-center gap-3 lg:gap-6">
                 <div className="flex flex-col items-end">
                     <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">GIVING</span>
-                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{user?.giving_budget} <span className="hidden xs:inline">pts</span></span>
+                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{me?.giving_budget} <span className="hidden xs:inline">pts</span></span>
                 </div>
                 <div className="flex flex-col items-end">
                     <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">EARNED</span>
-                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{user?.received_balance} <span className="hidden xs:inline">pts</span></span>
+                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{me?.received_balance} <span className="hidden xs:inline">pts</span></span>
                 </div>
 
                 <Button

@@ -2,12 +2,12 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, Gift } from 'lucide-react'
 import { path } from '@/routes/path'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useMe } from '@/hooks/useUsers';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils'
 
 export function Sidebar({ className }: { className?: string }) {
     const location = useLocation()
-    const { data: user } = useMe();
+    const { me } = useAuth();
 
     const NAV_ITEMS = [
         { name: 'Feed', icon: Home, path: path.home },
@@ -15,18 +15,18 @@ export function Sidebar({ className }: { className?: string }) {
     ]
 
     return (
-        <aside className={cn("w-64 flex flex-col pt-10 px-4 hidden lg:flex", className)}>
+        <aside className={cn("w-64 fixed flex flex-col pt-10 px-4  lg:flex", className)}>
             {/* User Profile Summary */}
             <div className="flex items-center gap-3 mb-10 px-4">
                 <Avatar className="w-10 h-10">
-                    <AvatarImage src={user?.avatar_url} alt={user?.display_name} />
+                    <AvatarImage src={me?.avatar_url} alt={me?.display_name} />
                     <AvatarFallback className="text-[10px]">
-                        {(user?.display_name || user?.username || '').substring(0, 2).toUpperCase()}
+                        {(me?.display_name || me?.username || '').substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
                 <div>
-                    <h3 className="font-semibold text-sm">{user?.display_name}</h3>
-                    <p className="text-xs text-slate-500">{user?.username}</p>
+                    <h3 className="font-semibold text-sm">{me?.display_name}</h3>
+                    <p className="text-xs text-slate-500">{me?.username}</p>
                 </div>
             </div>
 

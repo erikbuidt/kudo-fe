@@ -7,7 +7,19 @@ import { userKeys } from './useUsers';
 export const kudoKeys = {
     all: ['kudos'] as const,
     feed: () => [...kudoKeys.all, 'feed'] as const,
+    detail: (id: string) => [...kudoKeys.all, 'detail', id] as const,
     topValues: () => [...kudoKeys.all, 'top-values'] as const,
+};
+
+export const useKudo = (id: string) => {
+    return useQuery({
+        queryKey: kudoKeys.detail(id),
+        queryFn: async () => {
+            const response = await kudoApi.getKudo(id);
+            return response.data.data;
+        },
+        enabled: !!id,
+    });
 };
 
 export const useKudos = () => {

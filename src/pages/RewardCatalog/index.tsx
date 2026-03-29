@@ -23,14 +23,7 @@ export default function RewardCatalog() {
                     <h1 className="text-2xl font-bold text-slate-900 mb-2">Reward Catalog</h1>
                     <p className="text-slate-500">Redeem your hard-earned points for exclusive company swag, unique experiences, or some well-deserved time off.</p>
                 </div>
-                <div className="flex items-center gap-8">
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] font-bold text-slate-400 tracking-wider">AVAILABLE POINTS</span>
-                        <span className="text-xl font-bold text-indigo-600">
-                            {isLoadingUser ? <Loader2 className="w-5 h-5 animate-spin" /> : availablePoints.toLocaleString()}
-                        </span>
-                    </div>
-                </div>
+
             </div>
 
             <div className="flex bg-slate-100 p-1 rounded-xl w-fit mb-6">
@@ -108,7 +101,7 @@ function RedeemedItem({ redemption }: { redemption: Redemption }) {
     const imageUrl = reward.image_url || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2600&auto=format&fit=crop";
 
     return (
-        <Card className="rounded-2xl overflow-hidden shadow-sm flex flex-col border-slate-200 text-left opacity-90 hover:shadow-md transition-shadow">
+        <Card className="rounded-2xl py-0 overflow-hidden shadow-sm flex flex-col border-slate-200 text-left opacity-90 hover:shadow-md transition-shadow">
             <div className="h-32 bg-slate-100 shrink-0 relative grayscale-20">
                 <Badge className="absolute top-2 left-2 bg-indigo-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-wide border-0">Redeemed</Badge>
                 <img src={imageUrl} alt={reward.name} className="w-full h-full object-cover" />

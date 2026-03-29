@@ -4,19 +4,21 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { type Kudo } from '@/types/kudo.type'
+import { type Kudo, type MediaType } from '@/types/kudo.type'
 import { formatDistanceToNow } from '@/utils/dateUtils'
 import { useReactionSummary, useToggleReaction } from '@/hooks/useReactions'
 import { useComments, useAddComment } from '@/hooks/useComments'
 import { useUploadMedia } from '@/hooks/useUploadMedia'
 import { useMe } from '@/hooks/useUsers'
 import { cn } from '@/lib/utils'
+import { toast } from 'react-toastify';
 
 interface KudosFeedPostProps {
-    kudo: Kudo
+    kudo: Kudo;
+    defaultShowComments?: boolean;
 }
 
-export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
+export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPostProps) {
     const { id, sender, receiver, points, created_at, description, core_value, media_url } = kudo;
     const timeAgo = formatDistanceToNow(created_at);
 
@@ -27,7 +29,7 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
     const totalReactions = summary.reduce((acc, curr) => acc + curr._count.emoji, 0);
 
     // Comments
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(defaultShowComments);
     const { data: comments = [], isLoading: isLoadingComments } = useComments(showComments ? id : '');
     const { mutate: addComment, isPending: isSubmitting } = useAddComment();
     const { data: me } = useMe();
@@ -35,36 +37,55 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
     // Comment form state
     const [text, setText] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [uploadedMediaUrl, setUploadedMediaUrl] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedMediaType, setSelectedMediaType] = useState<MediaType | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const uploadMedia = useUploadMedia();
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
+        setSelectedFile(file);
+        setSelectedMediaType(file.type.startsWith('video/') ? 'VIDEO' : 'IMAGE');
         setPreviewUrl(URL.createObjectURL(file));
-        const result = await uploadMedia.mutateAsync(file);
-        setUploadedMediaUrl(result.media_url);
     };
 
     const clearMedia = () => {
         setPreviewUrl(null);
-        setUploadedMediaUrl(null);
+        setSelectedFile(null);
+        setSelectedMediaType(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!text.trim() && !uploadedMediaUrl) return;
-        addComment(
-            { kudo_id: id, content: text.trim(), ...(uploadedMediaUrl ? { media_url: uploadedMediaUrl } : {}) },
-            {
-                onSuccess: () => {
-                    setText('');
-                    clearMedia();
-                },
+        if (!text.trim() && !selectedFile) return;
+
+        let mediaUrl = null;
+
+        try {
+            if (selectedFile) {
+                const result = await uploadMedia.mutateAsync(selectedFile);
+                mediaUrl = result.media_url;
             }
-        );
+
+            addComment(
+                { 
+                    kudo_id: id, 
+                    content: text.trim(), 
+                    ...(mediaUrl ? { media_url: mediaUrl, media_type: selectedMediaType || 'IMAGE' } : {}) 
+                },
+                {
+                    onSuccess: () => {
+                        setText('');
+                        clearMedia();
+                    },
+                }
+            );
+        } catch (error) {
+            console.error('Failed to upload media:', error);
+            toast.error('Failed to upload attachment. Please try again.');
+        }
     };
 
     return (
@@ -102,7 +123,15 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
 
                 {media_url && (
                     <div className="rounded-xl overflow-hidden mb-4 shrink-0 border border-slate-100">
-                        <img src={media_url} alt="Recognition attachment" className="w-full h-auto max-h-80 object-cover" />
+                        {kudo.media_type === 'VIDEO' ? (
+                            <video 
+                                src={media_url} 
+                                controls 
+                                className="w-full h-auto max-h-80 object-cover"
+                            />
+                        ) : (
+                            <img src={media_url} alt="Recognition attachment" className="w-full h-auto max-h-80 object-cover" />
+                        )}
                     </div>
                 )}
 
@@ -186,7 +215,15 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                                             </div>
                                             {comment.media_url && (
                                                 <div className="mt-1.5 rounded-lg overflow-hidden border border-slate-100 max-w-xs">
-                                                    <img src={comment.media_url} alt="Comment attachment" className="w-full h-auto object-cover" />
+                                                    {comment.media_type === 'VIDEO' ? (
+                                                        <video 
+                                                            src={comment.media_url} 
+                                                            controls 
+                                                            className="w-full h-auto object-cover"
+                                                        />
+                                                    ) : (
+                                                        <img src={comment.media_url} alt="Comment attachment" className="w-full h-auto object-cover" />
+                                                    )}
                                                 </div>
                                             )}
                                             <div className="text-[10px] text-slate-400 mt-1 ml-1">
@@ -200,24 +237,7 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
 
                         {/* Comment composer */}
                         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-                            {/* Image preview */}
-                            {previewUrl && (
-                                <div className="relative w-fit">
-                                    <img src={previewUrl} alt="Preview" className="h-20 rounded-lg object-cover border border-slate-200" />
-                                    <button
-                                        type="button"
-                                        onClick={clearMedia}
-                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
-                                    >
-                                        <X className="w-3 h-3" />
-                                    </button>
-                                    {uploadMedia.isPending && (
-                                        <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center">
-                                            <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
+
 
                             <div className="flex items-center gap-2">
                                 <Avatar className="w-7 h-7 shrink-0">
@@ -257,12 +277,38 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                                 <Button
                                     type="submit"
                                     size="sm"
-                                    disabled={(!text.trim() && !uploadedMediaUrl) || isSubmitting || uploadMedia.isPending}
+                                    disabled={(!text.trim() && !selectedFile) || isSubmitting || uploadMedia.isPending}
                                     className="rounded-full w-8 h-8 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0"
                                 >
-                                    {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                    {isSubmitting || uploadMedia.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                                 </Button>
                             </div>
+                            {/* Image preview */}
+                            {previewUrl && (
+                                <div className="relative w-fit ml-9">
+                                    {selectedMediaType === 'VIDEO' ? (
+                                        <video
+                                            src={previewUrl}
+                                            className="h-20 w-auto rounded-lg object-cover border border-slate-200"
+                                            muted
+                                        />
+                                    ) : (
+                                        <img src={previewUrl} alt="Preview" className="h-20 rounded-lg object-cover border border-slate-200" />
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={clearMedia}
+                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                    {uploadMedia.isPending && (
+                                        <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center">
+                                            <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </form>
                     </div>
                 )}

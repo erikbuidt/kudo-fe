@@ -1,3 +1,5 @@
+import type { MediaType } from './kudo.type';
+
 export interface CommentUser {
     id: string;
     username: string;
@@ -11,6 +13,7 @@ export interface Comment {
     user_id: string;
     content: string;
     media_url?: string;
+    media_type?: MediaType;
     created_at: string;
     user: CommentUser;
 }
@@ -19,4 +22,5 @@ export interface CreateCommentPayload {
     kudo_id: string;
     content: string;
     media_url?: string;
+    media_type?: MediaType;
 }

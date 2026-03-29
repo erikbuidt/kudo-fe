@@ -50,11 +50,11 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
             <div className="flex items-center gap-3 lg:gap-6">
                 <div className="flex flex-col items-end">
-                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">GIVING</span>
+                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider block">GIVING</span>
                     <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{me?.giving_budget} <span className="hidden xs:inline">pts</span></span>
                 </div>
                 <div className="flex flex-col items-end">
-                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">EARNED</span>
+                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider block">EARNED</span>
                     <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{me?.received_balance} <span className="hidden xs:inline">pts</span></span>
                 </div>
 

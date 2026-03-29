@@ -6,8 +6,10 @@ export const rewardApi = {
     getAllRewards: () => {
         return http.get<SuccessResponseApi<Reward[]>>('rewards');
     },
-    redeemReward: (payload: RedeemRewardPayload) => {
-        return http.post<SuccessResponseApi<Redemption>>('rewards/redeem', payload);
+    redeemReward: (payload: RedeemRewardPayload, idempotencyKey: string) => {
+        return http.post<SuccessResponseApi<Redemption>>('rewards/redeem', payload, {
+            headers: { 'X-Idempotency-Key': idempotencyKey },
+        });
     },
     getMyRedemptions: () => {
         return http.get<SuccessResponseApi<Redemption[]>>('rewards/redemptions/me');

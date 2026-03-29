@@ -29,7 +29,7 @@ class Http {
                 if (response.config.url === 'auth/login') {
                     this.token = response?.data.data.access_token
                     window.localStorage.setItem('accessToken', this.token as string)
-                } else if (response.config.url === 'sign-out') {
+                } else if (response.config.url === 'auth/logout') {
                     this.token = ''
                     window.localStorage.removeItem('accessToken')
 

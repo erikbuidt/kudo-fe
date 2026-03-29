@@ -109,7 +109,7 @@ function RedeemedItem({ redemption }: { redemption: Redemption }) {
 
     return (
         <Card className="rounded-2xl overflow-hidden shadow-sm flex flex-col border-slate-200 text-left opacity-90 hover:shadow-md transition-shadow">
-            <div className="h-32 bg-slate-100 shrink-0 relative grayscale-[20%]">
+            <div className="h-32 bg-slate-100 shrink-0 relative grayscale-20">
                 <Badge className="absolute top-2 left-2 bg-indigo-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded tracking-wide border-0">Redeemed</Badge>
                 <img src={imageUrl} alt={reward.name} className="w-full h-full object-cover" />
             </div>
@@ -127,11 +127,32 @@ function RedeemedItem({ redemption }: { redemption: Redemption }) {
 
 function RewardItem({ reward, userBalance }: { reward: Reward, userBalance: number }) {
     const { mutate: redeem, isPending } = useRedeemReward();
+    const { data: user } = useMe();
     const canAfford = userBalance >= reward.point_cost;
     const isOutOfStock = reward.stock <= 0;
 
     // Use the actual backend image_url, or fallback to a placeholder if it's missing somehow
     const imageUrl = reward.image_url || "https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=2600&auto=format&fit=crop";
+
+    /**
+     * Build a deterministic idempotency key:
+     * SHA-256( user_id + ":" + point_cost + ":" + reward_id + ":" + floor(now / 60_000) )
+     *
+     * The time component is truncated to the current minute — so all rapid clicks
+     * within the same minute window share the same key (idempotent), but a
+     * legitimate retry in the next minute generates a brand-new key.
+     */
+    const buildIdempotencyKey = async (): Promise<string> => {
+        const minuteBucket = Math.floor(Date.now() / 5_000);
+        const raw = `${user?.id}:${reward.point_cost}:${reward.id}:${minuteBucket}`;
+        const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+        return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    };
+
+    const handleRedeem = async () => {
+        const idempotencyKey = await buildIdempotencyKey();
+        redeem({ payload: { reward_id: reward.id }, idempotencyKey });
+    };
 
     return (
         <Card className="rounded-2xl overflow-hidden hover:shadow-md transition-shadow flex flex-col border-slate-200 text-left py-0 s">
@@ -151,7 +172,7 @@ function RewardItem({ reward, userBalance }: { reward: Reward, userBalance: numb
                 <p className="text-xs text-slate-500 leading-relaxed mb-6">{reward.description}</p>
                 <Button
                     disabled={!canAfford || isOutOfStock || isPending}
-                    onClick={() => redeem({ reward_id: reward.id })}
+                    onClick={handleRedeem}
                     className="mt-auto w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold disabled:opacity-50"
                     variant="secondary"
                 >

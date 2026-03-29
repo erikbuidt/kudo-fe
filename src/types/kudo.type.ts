@@ -22,10 +22,8 @@ export interface Kudo {
   created_at: string;
   sender: KudoUser;
   receiver: KudoUser;
-  _count?: {
-    reactions: number;
-    comments: number;
-  };
+  comments_count?: number;
+  reactions_count?: number;
 }
 
 export interface CreateKudoPayload {

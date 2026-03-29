@@ -3,11 +3,12 @@ import { KudosFeedPost } from '@/components/KudosFeedPost'
 import { useKudos, useTopCoreValues } from '@/hooks/useKudos'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { GiveKudoModal } from '@/components/GiveKudoModal'
-import { useState } from 'react'
+import { useState, useLayoutEffect, useRef } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const scrollPosRef = useRef(0);
     const {
         data,
         isLoading,
@@ -19,6 +20,23 @@ export default function Home() {
 
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 
+    const kudos = data?.pages.flatMap(page => page.data) || [];
+
+    // Force scroll position to stay still when new items are added
+    useLayoutEffect(() => {
+        if (kudos.length > 0) {
+            window.scrollTo(0, scrollPosRef.current);
+        }
+    }, [kudos.length]);
+
+    const handleScroll = () => {
+        scrollPosRef.current = window.scrollY;
+    };
+
+    useLayoutEffect(() => {
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const loadMoreRef = useIntersectionObserver({
         onIntersect: () => {
@@ -29,8 +47,6 @@ export default function Home() {
         rootMargin: '600px',
         threshold: 0
     });
-
-    const kudos = data?.pages.flatMap(page => page.data) || [];
 
     return (
         <div className="max-w-5xl mx-auto flex gap-8 items-start">
@@ -93,16 +109,16 @@ export default function Home() {
                             {kudos.map(kudo => (
                                 <KudosFeedPost key={kudo.id} kudo={kudo} />
                             ))}
-                            <div className="w-full flex flex-col gap-6">
-                                {isFetchingNextPage && (<>
-                                    <SkeletonFeedPost />
-                                    <SkeletonFeedPost />
-                                </>)}
-                                <div ref={loadMoreRef} className="h-4 pointer-events-none" style={{ overflowAnchor: 'none' }} />
+                            {/* Loading / Pagination Zone */}
+                            <div className="w-full flex flex-col gap-6 py-4">
+                                {isFetchingNextPage && (
+                                    <>
+                                        <SkeletonFeedPost />
+                                    </>
+                                )}
+                                <div ref={loadMoreRef} className="h-1 pointer-events-none" />
                             </div>
-
                         </>
-
                     )}
                 </div>
             </div>
@@ -148,21 +164,6 @@ export default function Home() {
                         )}
                     </div>
                 </div>
-
-                {/* New Rewards Widget */}
-                <div className="bg-indigo-600 text-white rounded-2xl p-6 shadow-md relative overflow-hidden text-left">
-                    {/* Decorative abstract shape */}
-                    <div className="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/10 blur-xl"></div>
-
-                    <h3 className="font-bold text-lg leading-tight mb-2 relative z-10">New Rewards Available!</h3>
-                    <p className="text-indigo-100 text-xs mb-5 relative z-10 leading-relaxed">
-                        You have enough points to redeem the "Day Off Pass".
-                    </p>
-                    <button className="w-full bg-white text-indigo-700 text-xs font-bold tracking-wide uppercase py-2.5 rounded-lg hover:bg-slate-50 transition-colors relative z-10 shadow-sm">
-                        Browse Rewards
-                    </button>
-                </div>
-
             </div>
         </div>
     )

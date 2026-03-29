@@ -11,7 +11,6 @@ const useLogout = () => {
         mutationFn: () => authApi.logout(),
         onSuccess: () => {
             setIsAuthenticated(false);
-            window.localStorage.removeItem('accessToken');
 
         }
     })

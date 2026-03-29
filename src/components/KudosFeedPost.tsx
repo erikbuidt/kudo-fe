@@ -1,4 +1,5 @@
-import { Heart, MessageSquare } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Heart, MessageSquare, Image, X, Send, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -6,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import { type Kudo } from '@/types/kudo.type'
 import { formatDistanceToNow } from '@/utils/dateUtils'
 import { useReactionSummary, useToggleReaction } from '@/hooks/useReactions'
+import { useComments, useAddComment } from '@/hooks/useComments'
+import { useUploadMedia } from '@/hooks/useUploadMedia'
+import { useMe } from '@/hooks/useUsers'
 import { cn } from '@/lib/utils'
 
 interface KudosFeedPostProps {
@@ -16,18 +20,57 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
     const { id, sender, receiver, points, created_at, description, core_value, media_url } = kudo;
     const timeAgo = formatDistanceToNow(created_at);
 
+    // Reactions
     const { data: summary = [] } = useReactionSummary(id);
     const toggleReaction = useToggleReaction();
-
-    const handleToggle = (emoji: string) => {
-        toggleReaction.mutate({ kudo_id: id, emoji });
-    };
-
+    const handleToggle = (emoji: string) => toggleReaction.mutate({ kudo_id: id, emoji });
     const totalReactions = summary.reduce((acc, curr) => acc + curr._count.emoji, 0);
 
+    // Comments
+    const [showComments, setShowComments] = useState(false);
+    const { data: comments = [], isLoading: isLoadingComments } = useComments(showComments ? id : '');
+    const { mutate: addComment, isPending: isSubmitting } = useAddComment();
+    const { data: me } = useMe();
+
+    // Comment form state
+    const [text, setText] = useState('');
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [uploadedMediaUrl, setUploadedMediaUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const uploadMedia = useUploadMedia();
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setPreviewUrl(URL.createObjectURL(file));
+        const result = await uploadMedia.mutateAsync(file);
+        setUploadedMediaUrl(result.media_url);
+    };
+
+    const clearMedia = () => {
+        setPreviewUrl(null);
+        setUploadedMediaUrl(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!text.trim() && !uploadedMediaUrl) return;
+        addComment(
+            { kudo_id: id, content: text.trim(), ...(uploadedMediaUrl ? { media_url: uploadedMediaUrl } : {}) },
+            {
+                onSuccess: () => {
+                    setText('');
+                    clearMedia();
+                },
+            }
+        );
+    };
+
     return (
-        <Card className="rounded-2xl border-slate-200 shadow-sm hover:shadow transition-shadow">
+        <Card className="rounded-2xl border-slate-200 shadow-sm hover:shadow transition-shadow min-h-[320px]">
             <CardContent className="p-6 text-left">
+                {/* Header */}
                 <div className="flex justify-between items-start mb-4 gap-4">
                     <div className="flex gap-3">
                         <Avatar className="w-10 h-10">
@@ -48,6 +91,7 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                     </Badge>
                 </div>
 
+                {/* Body */}
                 <p className="text-slate-700 text-sm leading-relaxed mb-4 whitespace-pre-wrap">{description}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -62,7 +106,9 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                     </div>
                 )}
 
+                {/* Action bar */}
                 <div className="flex items-center gap-4 mt-6 border-t border-slate-100 pt-4">
+                    {/* Reactions */}
                     <div className="flex items-center gap-1.5">
                         <Button
                             variant="ghost"
@@ -78,7 +124,6 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                             {totalReactions > 0 && <span className="text-xs">{totalReactions}</span>}
                         </Button>
 
-                        {/* Other emojis summary */}
                         <div className="flex gap-1 ml-1">
                             {summary.map((item) => item.emoji !== '❤️' && (
                                 <button
@@ -92,23 +137,135 @@ export function KudosFeedPost({ kudo }: KudosFeedPostProps) {
                         </div>
                     </div>
 
-                    <Button variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-500 font-semibold gap-2 h-8 px-2">
-                        <MessageSquare className="w-4 h-4" /> {kudo._count?.comments || 0}
+                    {/* Comment toggle */}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowComments(v => !v)}
+                        className={cn(
+                            "text-slate-500 hover:text-indigo-500 font-semibold gap-2 h-8 px-2 rounded-lg",
+                            showComments && "text-indigo-600 bg-indigo-50"
+                        )}
+                    >
+                        <MessageSquare className="w-4 h-4" />
+                        <span className="text-xs">
+                            {showComments && comments.length > 0
+                                ? comments.length
+                                : (kudo.comments_count ?? 0)}
+                        </span>
                     </Button>
-
-
-                    <div className="ml-auto flex -space-x-2">
-                        <Avatar className="w-6 h-6 border-2 border-white relative z-20">
-                            <AvatarImage src="https://i.pravatar.cc/150?u=a" />
-                        </Avatar>
-                        <Avatar className="w-6 h-6 border-2 border-white relative z-10">
-                            <AvatarImage src="https://i.pravatar.cc/150?u=b" />
-                        </Avatar>
-                        <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 text-[10px] font-bold text-slate-500 flex items-center justify-center relative z-0">
-                            +10
-                        </div>
-                    </div>
                 </div>
+
+                {/* Inline comment panel */}
+                {showComments && (
+                    <div className="mt-4 border-t border-slate-100 pt-4 space-y-4">
+
+                        {/* Comment list */}
+                        {isLoadingComments ? (
+                            <div className="flex justify-center py-4">
+                                <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+                            </div>
+                        ) : comments.length === 0 ? (
+                            <p className="text-xs text-slate-400 text-center py-2">No comments yet. Be the first!</p>
+                        ) : (
+                            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                                {comments.map(comment => (
+                                    <div key={comment.id} className="flex gap-2.5">
+                                        <Avatar className="w-7 h-7 shrink-0 mt-0.5">
+                                            <AvatarImage src={comment.user.avatar_url} />
+                                            <AvatarFallback className="text-[10px]">
+                                                {(comment.user.display_name || comment.user.username).substring(0, 2).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="bg-slate-50 rounded-xl px-3 py-2 text-sm border border-slate-100">
+                                                <span className="font-semibold text-slate-800 mr-1.5 text-xs">
+                                                    {comment.user.display_name || comment.user.username}
+                                                </span>
+                                                <span className="text-slate-600 wrap-break-word">{comment.content}</span>
+                                            </div>
+                                            {comment.media_url && (
+                                                <div className="mt-1.5 rounded-lg overflow-hidden border border-slate-100 max-w-xs">
+                                                    <img src={comment.media_url} alt="Comment attachment" className="w-full h-auto object-cover" />
+                                                </div>
+                                            )}
+                                            <div className="text-[10px] text-slate-400 mt-1 ml-1">
+                                                {formatDistanceToNow(comment.created_at)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Comment composer */}
+                        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+                            {/* Image preview */}
+                            {previewUrl && (
+                                <div className="relative w-fit">
+                                    <img src={previewUrl} alt="Preview" className="h-20 rounded-lg object-cover border border-slate-200" />
+                                    <button
+                                        type="button"
+                                        onClick={clearMedia}
+                                        className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-slate-700 text-white flex items-center justify-center hover:bg-red-500 transition-colors"
+                                    >
+                                        <X className="w-3 h-3" />
+                                    </button>
+                                    {uploadMedia.isPending && (
+                                        <div className="absolute inset-0 bg-white/60 rounded-lg flex items-center justify-center">
+                                            <Loader2 className="w-4 h-4 animate-spin text-slate-500" />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                                <Avatar className="w-7 h-7 shrink-0">
+                                    <AvatarImage src={me?.avatar_url} />
+                                    <AvatarFallback className="text-[10px]">
+                                        {(me?.display_name || me?.username || 'Me').substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+
+                                <div className="flex-1 flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full px-3 py-1.5 focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
+                                    <input
+                                        type="text"
+                                        value={text}
+                                        onChange={e => setText(e.target.value)}
+                                        placeholder="Write a comment…"
+                                        className="flex-1 bg-transparent text-sm outline-none text-slate-700 placeholder-slate-400 min-w-0"
+                                    />
+
+                                    {/* Image attach button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={uploadMedia.isPending}
+                                        className="text-slate-400 hover:text-indigo-500 transition-colors p-0.5 shrink-0"
+                                    >
+                                        <Image className="w-4 h-4" />
+                                    </button>
+                                    <input
+                                        type="file"
+                                        accept="image/*,video/*"
+                                        ref={fileInputRef}
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    size="sm"
+                                    disabled={(!text.trim() && !uploadedMediaUrl) || isSubmitting || uploadMedia.isPending}
+                                    className="rounded-full w-8 h-8 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                                >
+                                    {isSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                                </Button>
+                            </div>
+                        </form>
+                    </div>
+                )}
             </CardContent>
         </Card>
     )

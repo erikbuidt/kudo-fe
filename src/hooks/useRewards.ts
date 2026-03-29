@@ -27,7 +27,8 @@ export const useRedeemReward = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: RedeemRewardPayload) => rewardApi.redeemReward(payload),
+        mutationFn: ({ payload, idempotencyKey }: { payload: RedeemRewardPayload; idempotencyKey: string }) =>
+            rewardApi.redeemReward(payload, idempotencyKey),
         onSuccess: () => {
             toast.success('Reward redeemed successfully!');
             queryClient.invalidateQueries({ queryKey: rewardKeys.all });
@@ -36,6 +37,9 @@ export const useRedeemReward = () => {
         },
         onError: (error: any) => {
             const message = error.response?.data?.message || error.message || 'Failed to redeem reward';
+            // Silently ignore idempotency duplicates — the first request already
+            // succeeded and its success toast was already shown.
+            if (message.includes('already been processed')) return;
             toast.error(message);
         }
     });

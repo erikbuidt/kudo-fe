@@ -3,19 +3,19 @@ import { Home, Gift, User } from 'lucide-react'
 import { path } from '@/routes/path'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useMe } from '@/hooks/useUsers';
+import { cn } from '@/lib/utils'
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
     const location = useLocation()
     const { data: user } = useMe();
 
     const NAV_ITEMS = [
         { name: 'Feed', icon: Home, path: path.home },
         { name: 'Rewards', icon: Gift, path: '/reward-catalog' },
-        { name: 'Profile', icon: User, path: '/profile' }
     ]
 
     return (
-        <aside className="w-64 flex flex-col pt-10 px-4">
+        <aside className={cn("w-64 flex flex-col pt-10 px-4 hidden lg:flex", className)}>
             {/* User Profile Summary */}
             <div className="flex items-center gap-3 mb-10 px-4">
                 <Avatar className="w-10 h-10">
@@ -44,16 +44,6 @@ export function Sidebar() {
                     )
                 })}
             </nav>
-
-            {/* Settings & Help */}
-            <div className="mt-auto pb-8 flex flex-col gap-2">
-                <button className="flex items-center gap-3 px-4 py-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
-                    Settings
-                </button>
-                <button className="flex items-center gap-3 px-4 py-2 text-sm text-slate-500 hover:text-slate-800 transition-colors">
-                    Help
-                </button>
-            </div>
         </aside>
     )
 }

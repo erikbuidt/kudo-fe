@@ -49,9 +49,9 @@ export default function Home() {
     });
 
     return (
-        <div className="max-w-5xl mx-auto flex gap-8 items-start">
+        <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
             {/* Main Feed Column */}
-            <div className="flex-1 w-full max-w-2xl flex flex-col gap-6" style={{ overflowAnchor: 'none' }}>
+            <div className="flex-1 w-full lg:max-w-2xl flex flex-col gap-4 lg:gap-6" style={{ overflowAnchor: 'none' }}>
 
                 {/* Compose Box */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
@@ -65,12 +65,8 @@ export default function Home() {
                             readOnly
                         />
                     </div>
-                    <div className="flex items-center justify-between pl-13">
-                        <div className="flex gap-2">
-                            <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-slate-50"><ImageIcon className="w-4 h-4" /></button>
-                            <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-slate-50"><Paperclip className="w-4 h-4" /></button>
-                            <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors rounded-lg hover:bg-slate-50"><Smile className="w-4 h-4" /></button>
-                        </div>
+                    <div className="flex justify-end pl-13">
+
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors shadow-sm"
@@ -78,15 +74,6 @@ export default function Home() {
                             Give Recognition
                         </button>
                     </div>
-                </div>
-
-                {/* Feed Header */}
-                <div className="flex items-center justify-between mt-2">
-                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Live Recognition Feed</h2>
-                    <button className="flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                        <Filter className="w-4 h-4" />
-                        Sort: Recent
-                    </button>
                 </div>
 
                 {/* Feed Posts */}

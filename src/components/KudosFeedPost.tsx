@@ -70,10 +70,10 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
             }
 
             addComment(
-                { 
-                    kudo_id: id, 
-                    content: text.trim(), 
-                    ...(mediaUrl ? { media_url: mediaUrl, media_type: selectedMediaType || 'IMAGE' } : {}) 
+                {
+                    kudo_id: id,
+                    content: text.trim(),
+                    ...(mediaUrl ? { media_url: mediaUrl, media_type: selectedMediaType || 'IMAGE' } : {})
                 },
                 {
                     onSuccess: () => {
@@ -89,31 +89,31 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
     };
 
     return (
-        <Card className="rounded-2xl border-slate-200 shadow-sm hover:shadow transition-shadow min-h-[320px]">
-            <CardContent className="p-6 text-left">
+        <Card className="rounded-2xl border-slate-200 shadow-sm hover:shadow transition-shadow min-h-[200px]">
+            <CardContent className="p-4 lg:p-6 text-left">
                 {/* Header */}
-                <div className="flex justify-between items-start mb-4 gap-4">
-                    <div className="flex gap-3">
-                        <Avatar className="w-10 h-10">
+                <div className="flex justify-between items-start mb-4 gap-2 lg:gap-4">
+                    <div className="flex gap-2 lg:gap-3">
+                        <Avatar className="w-8 h-8 lg:w-10 lg:h-10">
                             <AvatarImage src={sender.avatar_url} alt={sender.display_name || sender.username} />
                             <AvatarFallback>{(sender.display_name || sender.username).substring(0, 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
-                        <div>
-                            <div className="text-sm">
-                                <span className="font-bold text-slate-900">{sender.display_name || sender.username}</span>
+                        <div className="min-w-0">
+                            <div className="text-xs lg:text-sm leading-tight lg:leading-normal">
+                                <span className="font-bold text-slate-900 truncate">{sender.display_name || sender.username}</span>
                                 <span className="text-slate-500 mx-1">recognized</span>
-                                <span className="font-bold text-slate-900">{receiver.display_name || receiver.username}</span>
+                                <span className="font-bold text-slate-900 truncate">{receiver.display_name || receiver.username}</span>
                             </div>
-                            <div className="text-xs text-slate-400 mt-0.5">{timeAgo}</div>
+                            <div className="text-[10px] lg:text-xs text-slate-400 mt-0.5">{timeAgo}</div>
                         </div>
                     </div>
-                    <Badge variant="secondary" className="bg-linear-to-r from-fuchsia-500 to-purple-600 text-white hover:opacity-90 font-bold px-2.5 py-1 rounded-full shrink-0 border-0">
+                    <Badge variant="secondary" className="bg-linear-to-r from-fuchsia-500 to-purple-600 text-white hover:opacity-90 font-bold px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-full shrink-0 border-0 text-[10px] lg:text-xs">
                         +{points} PTS
                     </Badge>
                 </div>
 
                 {/* Body */}
-                <p className="text-slate-700 text-sm leading-relaxed mb-4 whitespace-pre-wrap">{description}</p>
+                <p className="text-slate-700 text-xs lg:text-sm leading-relaxed mb-4 whitespace-pre-wrap">{description}</p>
 
                 <div className="flex flex-wrap gap-2 mb-4">
                     <Badge className="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 font-medium px-2 py-1 rounded-md border-0 uppercase text-[10px] tracking-wider">
@@ -124,13 +124,13 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
                 {media_url && (
                     <div className="rounded-xl overflow-hidden mb-4 shrink-0 border border-slate-100">
                         {kudo.media_type === 'VIDEO' ? (
-                            <video 
-                                src={media_url} 
-                                controls 
-                                className="w-full h-auto max-h-80 object-cover"
+                            <video
+                                src={media_url}
+                                controls
+                                className="w-full h-auto max-h-60 lg:max-h-80 object-cover"
                             />
                         ) : (
-                            <img src={media_url} alt="Recognition attachment" className="w-full h-auto max-h-80 object-cover" />
+                            <img src={media_url} alt="Recognition attachment" className="w-full h-auto max-h-60 lg:max-h-80 object-cover" />
                         )}
                     </div>
                 )}
@@ -216,9 +216,9 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
                                             {comment.media_url && (
                                                 <div className="mt-1.5 rounded-lg overflow-hidden border border-slate-100 max-w-xs">
                                                     {comment.media_type === 'VIDEO' ? (
-                                                        <video 
-                                                            src={comment.media_url} 
-                                                            controls 
+                                                        <video
+                                                            src={comment.media_url}
+                                                            controls
                                                             className="w-full h-auto object-cover"
                                                         />
                                                     ) : (

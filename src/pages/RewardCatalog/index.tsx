@@ -26,16 +26,16 @@ export default function RewardCatalog() {
 
             </div>
 
-            <div className="flex bg-slate-100 p-1 rounded-xl w-fit mb-6">
+            <div className="flex bg-slate-100 p-1 rounded-xl w-fit mb-6 overflow-x-auto max-w-full">
                 <button
                     onClick={() => setView('catalog')}
-                    className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${view === 'catalog' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-4 lg:px-5 py-2 text-xs lg:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${view === 'catalog' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                     Catalog
                 </button>
                 <button
                     onClick={() => setView('my-redemptions')}
-                    className={`px-5 py-2 text-sm font-bold rounded-lg transition-all ${view === 'my-redemptions' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`px-4 lg:px-5 py-2 text-xs lg:text-sm font-bold rounded-lg transition-all whitespace-nowrap ${view === 'my-redemptions' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                     My Redemptions
                 </button>
@@ -43,11 +43,11 @@ export default function RewardCatalog() {
 
             {view === 'catalog' ? (
                 <>
-                    <div className="flex items-center gap-2 mb-8 border-b border-slate-200 pb-px">
+                    <div className="flex items-center gap-2 mb-6 lg:mb-8 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar">
                         {['All Rewards'].map((category, i) => (
                             <button
                                 key={category}
-                                className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${i === 0 ? 'text-indigo-600 border-indigo-600' : 'text-slate-500 border-transparent hover:text-slate-800'}`}
+                                className={`px-4 py-2 text-xs lg:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${i === 0 ? 'text-indigo-600 border-indigo-600' : 'text-slate-500 border-transparent hover:text-slate-800'}`}
                             >
                                 {category}
                             </button>
@@ -55,7 +55,7 @@ export default function RewardCatalog() {
                     </div>
 
                     {/* Grid of items */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-6">
                         {isLoadingRewards ? (
                             <div className="col-span-full flex justify-center py-20 text-slate-400">
                                 <Loader2 className="w-8 h-8 animate-spin" />
@@ -76,7 +76,7 @@ export default function RewardCatalog() {
                     </div>
                 </>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {isLoadingRedemptions ? (
                         <div className="col-span-full flex justify-center py-20 text-slate-400">
                             <Loader2 className="w-8 h-8 animate-spin" />

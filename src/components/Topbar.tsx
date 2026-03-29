@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Search, Bell, LogOut } from 'lucide-react'
+import { Search, Bell, LogOut, Menu } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { GiveKudoModal } from './GiveKudoModal'
@@ -11,11 +11,9 @@ import {
 import { NotificationFeed } from './NotificationFeed'
 import { useUnreadCount } from '../hooks/useNotifications'
 import { useMe } from '../hooks/useUsers'
-import { authApi } from '@/apis/auth.api'
-import { useQueryClient } from '@tanstack/react-query'
 import { useLogout } from '@/hooks/useAuth'
 
-export function Topbar() {
+export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { data: unreadCount = 0 } = useUnreadCount();
     const { data: user } = useMe();
@@ -26,12 +24,20 @@ export function Topbar() {
     }
 
     return (
-        <header className="h-20 flex items-center justify-between px-8 bg-white border-b border-slate-100 sticky top-0 z-50">
-            <div className="flex items-center gap-2">
-                <div className="text-indigo-600 font-bold text-xl tracking-tight">The Elevated Exchange</div>
+        <header className="h-20 flex items-center justify-between px-4 lg:px-8 bg-white border-b border-slate-100 sticky top-0 z-50">
+            <div className="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="lg:hidden p-0 h-10 w-10 text-slate-600"
+                    onClick={onMenuClick}
+                >
+                    <Menu className="w-6 h-6" />
+                </Button>
+                <div className="text-indigo-600 font-bold text-lg lg:text-xl tracking-tight leading-none">The Elevated Exchange</div>
             </div>
 
-            <div className="flex-1 max-w-xl px-8">
+            <div className="flex-1 max-w-xl px-4 hidden md:block">
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
@@ -41,21 +47,22 @@ export function Topbar() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 lg:gap-6">
                 <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">POINTS BUDGET</span>
-                    <span className="text-sm font-medium text-indigo-600">{user?.giving_budget} pts</span>
+                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">GIVING</span>
+                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{user?.giving_budget} <span className="hidden xs:inline">pts</span></span>
                 </div>
                 <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-bold text-slate-400 tracking-wider">POINTS RECEIVED</span>
-                    <span className="text-sm font-medium text-indigo-600">{user?.received_balance} pts</span>
+                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 tracking-wider hidden xs:block">EARNED</span>
+                    <span className="text-xs lg:text-sm font-medium text-indigo-600 leading-tight">{user?.received_balance} <span className="hidden xs:inline">pts</span></span>
                 </div>
 
                 <Button
                     onClick={() => setIsModalOpen(true)}
-                    className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-5"
+                    className="rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 lg:px-6 py-4 lg:py-5 text-sm"
                 >
-                    Give Kudos
+                    <span className="hidden xs:inline">Give Kudos</span>
+                    <span className="xs:hidden font-bold">+</span>
                 </Button>
 
                 <Popover>

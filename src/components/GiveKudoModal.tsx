@@ -140,7 +140,7 @@ export function GiveKudoModal({ isOpen, onClose }: GiveKudoModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-0 rounded-3xl shadow-2xl">
+            <DialogContent className="sm:max-w-[500px] md:max-w-[600px] p-0 overflow-hidden border-0 rounded-3xl shadow-2xl">
                 <DialogHeader className="p-6 border-b border-slate-100 bg-white sticky top-0 z-10">
                     <DialogTitle className="text-xl font-bold text-slate-900">Give Recognition</DialogTitle>
                     <DialogDescription>Celebrate your colleagues' achievements</DialogDescription>

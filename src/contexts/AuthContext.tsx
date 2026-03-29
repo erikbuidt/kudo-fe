@@ -1,17 +1,13 @@
-import { useMe } from "@/hooks/useUsers";
-import type { KudoUser } from "@/types/kudo.type";
 import { createContext, type ReactNode, useMemo, useState } from "react";
 
 interface AuthContextInterface {
     isAuthenticated: boolean
-    me: KudoUser | undefined,
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
     resetAuthenticated: () => void,
 }
 
 const AuthContext = createContext<AuthContextInterface>({
     isAuthenticated: !!window.localStorage.getItem('accessToken'),
-    me: undefined,
     setIsAuthenticated: () => null,
     resetAuthenticated: () => null,
 })
@@ -25,18 +21,15 @@ const AuthProvider = ({ children }: Props) => {
         setIsAuthenticated(false)
     }
 
-    const { data: me } = useMe();
-    console.log({ me })
 
     const value = useMemo(
         () => ({
             isAuthenticated,
             setIsAuthenticated,
             resetAuthenticated,
-            me
 
         }),
-        [isAuthenticated, me]
+        [isAuthenticated]
     )
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

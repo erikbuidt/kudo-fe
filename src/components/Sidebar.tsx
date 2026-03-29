@@ -2,12 +2,13 @@ import { Link, useLocation } from 'react-router-dom'
 import { Home, Gift } from 'lucide-react'
 import { path } from '@/routes/path'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils'
+import { useContext } from 'react'
+import { UserContext } from '@/contexts/UserContext'
 
 export function Sidebar({ className }: { className?: string }) {
     const location = useLocation()
-    const { me } = useAuth();
+    const { me } = useContext(UserContext)
 
     const NAV_ITEMS = [
         { name: 'Feed', icon: Home, path: path.home },

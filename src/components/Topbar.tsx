@@ -10,12 +10,14 @@ import {
 } from "./ui/popover"
 import { NotificationFeed } from './NotificationFeed'
 import { useUnreadCount } from '../hooks/useNotifications'
-import { useAuth, useLogout } from '@/hooks/useAuth'
+import { useLogout } from '@/hooks/useAuth'
+import { useContext } from 'react'
+import { UserContext } from '@/contexts/UserContext'
 
 export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const { data: unreadCount = 0 } = useUnreadCount();
-    const { me } = useAuth();
+    const { me } = useContext(UserContext)
     const logout = useLogout();
 
     const handleLogOut = () => {

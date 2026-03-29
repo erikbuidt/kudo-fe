@@ -5,8 +5,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { kudoKeys } from '@/hooks/useKudos';
 import { notificationKeys } from '@/hooks/useNotifications';
 import { reactionKeys } from '@/hooks/useReactions';
-import { useAuth } from '@/hooks/useAuth';
 import { userKeys } from '@/hooks/useUsers';
+import { UserContext } from './UserContext';
 
 interface SocketContextType {
     socket: Socket | null;
@@ -23,7 +23,7 @@ export const useSocket = () => useContext(SocketContext);
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
-    const { me } = useAuth();
+    const { me } = useContext(UserContext)
     const queryClient = useQueryClient();
 
     // Use a ref to keep track of 'me' without re-triggering the useEffect

@@ -1,16 +1,17 @@
-import { useState } from 'react'
+import { useContext, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useRewards, useRedeemReward, useMyRedemptions } from '@/hooks/useRewards'
 import { Loader2 } from 'lucide-react'
 import type { Reward, Redemption } from '@/types/reward.type'
-import { useAuth } from '@/hooks/useAuth'
+import { UserContext } from '@/contexts/UserContext'
+
 
 
 export default function RewardCatalog() {
     const [view, setView] = useState<'catalog' | 'my-redemptions'>('catalog')
-    const { me } = useAuth()
+    const { me } = useContext(UserContext)
     const { data: rewards = [], isLoading: isLoadingRewards } = useRewards()
     const { data: myRedemptions = [], isLoading: isLoadingRedemptions } = useMyRedemptions()
 
@@ -120,7 +121,7 @@ function RedeemedItem({ redemption }: { redemption: Redemption }) {
 
 function RewardItem({ reward, userBalance }: { reward: Reward, userBalance: number }) {
     const { mutate: redeem, isPending } = useRedeemReward();
-    const { me } = useAuth();
+    const { me } = useContext(UserContext)
     const canAfford = userBalance >= reward.point_cost;
     const isOutOfStock = reward.stock <= 0;
 

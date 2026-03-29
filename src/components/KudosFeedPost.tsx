@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useContext } from 'react'
 import { Heart, MessageSquare, Image, X, Send, Loader2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -12,6 +12,8 @@ import { useUploadMedia } from '@/hooks/useUploadMedia'
 import { cn } from '@/lib/utils'
 import { toast } from 'react-toastify';
 import { useAuth } from '@/hooks/useAuth'
+import { useUsers } from '@/hooks/useUsers'
+import { UserContext } from '@/contexts/UserContext'
 
 interface KudosFeedPostProps {
     kudo: Kudo;
@@ -32,7 +34,7 @@ export function KudosFeedPost({ kudo, defaultShowComments = false }: KudosFeedPo
     const [showComments, setShowComments] = useState(defaultShowComments);
     const { data: comments = [], isLoading: isLoadingComments } = useComments(showComments ? id : '');
     const { mutate: addComment, isPending: isSubmitting } = useAddComment();
-    const { me } = useAuth()
+    const { me } = useContext(UserContext)
     // Comment form state
     const [text, setText] = useState('');
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);

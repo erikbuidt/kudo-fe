@@ -3,6 +3,7 @@ import { useRoutes } from 'react-router-dom'
 import { path } from './path'
 import MainLayout from '@/layouts/MainLayout/MainLayout'
 import { AuthGuard, RedirectIfAuthenticated } from '@/guard/AuthGuard/AuthGuard'
+import { UserProvider } from '@/contexts/UserContext'
 const SignIn = lazy(() => import('@/pages/SignIn'))
 const SignUp = lazy(() => import('@/pages/SignUp'))
 const Home = lazy(() => import('@/pages/Home/Home'))
@@ -36,9 +37,11 @@ export function Routes() {
             element: (
                 <Suspense fallback={<></>}>
                     <AuthGuard>
-                        <MainLayout>
-                            <Home />
-                        </MainLayout>
+                        <UserProvider>
+                            <MainLayout>
+                                <Home />
+                            </MainLayout>
+                        </UserProvider>
                     </AuthGuard>
                 </Suspense>
             )

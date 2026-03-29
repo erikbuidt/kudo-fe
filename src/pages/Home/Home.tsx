@@ -3,10 +3,11 @@ import { KudosFeedPost } from '@/components/KudosFeedPost'
 import { useKudos, useTopCoreValues } from '@/hooks/useKudos'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { GiveKudoModal } from '@/components/GiveKudoModal'
-import { useState, useLayoutEffect, useRef } from 'react'
+import { useState, useLayoutEffect, useRef, useContext } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAuth } from '@/hooks/useAuth'
+import { UserContext } from '@/contexts/UserContext'
+
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -20,7 +21,7 @@ export default function Home() {
         isFetchingNextPage
     } = useKudos();
 
-    const { me } = useAuth();
+    const { me } = useContext(UserContext)
 
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 

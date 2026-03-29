@@ -19,12 +19,14 @@ export function Sidebar({ className }: { className?: string }) {
             {/* User Profile Summary */}
             <div className="flex items-center gap-3 mb-10 px-4">
                 <Avatar className="w-10 h-10">
-                    <AvatarImage src="https://i.pravatar.cc/150?u=1" alt="Alex Rivers" />
-                    <AvatarFallback>AR</AvatarFallback>
+                    <AvatarImage src={user?.avatar_url} alt={user?.display_name} />
+                    <AvatarFallback className="text-[10px]">
+                        {(user?.display_name || user?.username || '').substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
                 </Avatar>
                 <div>
                     <h3 className="font-semibold text-sm">{user?.display_name}</h3>
-                    <p className="text-xs text-slate-500">Senior Designer</p>
+                    <p className="text-xs text-slate-500">{user?.username}</p>
                 </div>
             </div>
 

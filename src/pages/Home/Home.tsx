@@ -5,6 +5,8 @@ import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { GiveKudoModal } from '@/components/GiveKudoModal'
 import { useState, useLayoutEffect, useRef } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useMe } from '@/hooks/useUsers'
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -17,6 +19,8 @@ export default function Home() {
         fetchNextPage,
         isFetchingNextPage
     } = useKudos();
+
+    const { data: user } = useMe();
 
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 
@@ -56,7 +60,12 @@ export default function Home() {
                 {/* Compose Box */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
                     <div className="flex gap-3 items-center">
-                        <img src="https://i.pravatar.cc/150?u=1" className="w-10 h-10 rounded-full shrink-0" alt="Me" />
+                        <Avatar className="w-10 h-10">
+                            <AvatarImage src={user?.avatar_url} alt={user?.display_name} />
+                            <AvatarFallback className="text-[10px]">
+                                {(user?.display_name || user?.username || '').substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                        </Avatar>
                         <input
                             type="text"
                             placeholder="Give a Kudo to someone..."

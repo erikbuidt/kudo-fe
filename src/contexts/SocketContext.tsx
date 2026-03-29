@@ -30,8 +30,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // Initialize socket with /notifications namespace
         // If BASE_URL is relative (like /api), we should connect to the current host
-        const socketUrl = config.BASE_URL.startsWith('http') 
-            ? `${config.BASE_URL}/notifications` 
+        const socketUrl = config.BASE_URL.startsWith('http')
+            ? `${config.BASE_URL}/notifications`
             : '/notifications';
 
         const newSocket = io(socketUrl, {

@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Kudo Platform Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive, and beautiful peer-to-peer recognition dashboard built with React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live Kudos Feed**: Real-time updates of peer appreciation across the organization.
+- **Peer Recognition**: Intuitive UI for sending kudos with points and descriptions.
+- **Interactive Dashboard**: Track your giving budget and earned points at a glance.
+- **Reward Catalog**: Browse and redeem rewards with a seamless grid interface.
+- **Activity Notifications**: Persistent notification center for reactions and comments.
+- **Responsive Design**: Fully optimized for Desktop, Tablet, and Mobile.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **UI Components**: [Shadcn UI](https://ui.shadcn.com/) & [Radix UI](https://www.radix-ui.com/)
+- **State Management**: [TanStack Query (React Query) v5](https://tanstack.com/query/latest)
+- **Routing**: [React Router v7](https://reactrouter.com/)
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Icons**: [Lucide React](https://lucide.dev/) & [Tabler Icons](https://tabler.io/icons)
+- **Real-time**: [Socket.io Client](https://socket.io/docs/v4/client-api/)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📋 Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Ensure you have the following installed:
+- [Node.js](https://nodejs.org/) (v20 or higher)
+- [npm](https://www.npmjs.com/)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## ⚙️ Getting Started
+
+### 1. Clone & Install
+```bash
+git clone <your-repo-url>
+cd amanotes-fe
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 2. Environment Configuration
+Create a `.env` file in the root directory:
+```bash
+cp .env.example .env # If available, otherwise create it
 ```
+Required variables:
+```bash
+# The full URL of your Kudo Backend API
+VITE_API_URL=http://localhost:3000
+```
+
+### 3. Running the App
+```bash
+# Start development server with HMR
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+---
+
+## 🏗 Docker Deployment
+
+To build and run the frontend using Docker (with Nginx):
+```bash
+# Build the image with the API URL baked in
+docker build -t kudo-frontend --build-arg VITE_API_URL=https://api.yourdomain.com .
+
+# Run the container
+docker run -p 80:80 kudo-frontend
+```
+
+---
+
+## 📋 Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production (outputs to `/dist`) |
+| `npm run lint` | Run ESLint to check for code quality |
+| `npm run preview` | Locally preview the production build |
+
+---
+
+## 📂 Project Structure
+
+- `/src/apis`: API client definitions using Axios.
+- `/src/components`: Reusable UI components (Shadcn + custom).
+- `/src/contexts`: React Contexts for Auth, User Data, and WebSockets.
+- `/src/hooks`: Custom hooks for data fetching (React Query) and utility logic.
+- `/src/pages`: Main application views (Home, SignIn, etc.).
+- `/src/types`: TypeScript interfaces and types.
+
+---
+
+## 📄 License
+This project is [UNLICENSED](LICENSE).

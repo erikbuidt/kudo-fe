@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { IconBrandGoogleFilled } from '@tabler/icons-react'
+import { config } from '@/constants/config'
 
 const signInSchema = z.object({
     email: z.string().email('Enter a valid email address'),
@@ -52,7 +53,7 @@ function SignIn() {
 
 
     const handleLoginWithGoogle = () => {
-        window.location.href = `http://localhost:3000/auth/google`
+        window.location.href = `${config.BASE_URL}/auth/google`
     }
 
     return (

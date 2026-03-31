@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Search, Bell, LogOut, Menu } from 'lucide-react'
+import { useState, useCallback } from 'react'
+import { Search, Bell, LogOut, Menu, X } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { GiveKudoModal } from './GiveKudoModal'
@@ -13,9 +13,11 @@ import { useUnreadCount } from '../hooks/useNotifications'
 import { useLogout } from '@/hooks/useAuth'
 import { useContext } from 'react'
 import { UserContext } from '@/contexts/UserContext'
+import { useSearch } from '@/contexts/SearchContext'
 
 export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const { searchQuery, setSearchQuery } = useSearch()
     const { data: unreadCount = 0 } = useUnreadCount();
     const { me } = useContext(UserContext)
     const logout = useLogout();
@@ -23,6 +25,14 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
     const handleLogOut = () => {
         logout.mutate();
     }
+
+    const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+    }, [setSearchQuery]);
+
+    const clearSearch = () => {
+        setSearchQuery('');
+    };
 
     return (
         <header className="h-20 flex items-center justify-between px-4 lg:px-8 bg-white border-b border-slate-100 sticky top-0 z-50">
@@ -42,9 +52,19 @@ export function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <Input
-                        placeholder="Search recognition..."
-                        className="pl-10 bg-slate-50 border-none rounded-full focus-visible:ring-1 focus-visible:ring-indigo-100 py-5"
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        placeholder="AI search recognition..."
+                        className="pl-10 pr-9 bg-slate-50 border-none rounded-full focus-visible:ring-1 focus-visible:ring-indigo-100 py-5"
                     />
+                    {searchQuery && (
+                        <button
+                            onClick={clearSearch}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 

@@ -14,5 +14,8 @@ export const kudoApi = {
     },
     getTopValues: () => {
         return http.get<SuccessResponseApi<{ core_value: string, count: number }[]>>('kudos/top-values');
+    },
+    searchKudos: (query: string) => {
+        return http.get<SuccessResponseApi<Kudo[]>>('kudos/search', { params: { q: query } });
     }
 }

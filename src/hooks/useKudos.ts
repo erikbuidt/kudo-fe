@@ -3,12 +3,14 @@ import { kudoApi } from '../apis/kudo.api';
 import { type CreateKudoPayload } from '../types/kudo.type';
 import { toast } from 'react-toastify';
 import { userKeys } from './useUsers';
+import { useDebounce } from './useDebounce';
 
 export const kudoKeys = {
     all: ['kudos'] as const,
     feed: () => [...kudoKeys.all, 'feed'] as const,
     detail: (id: string) => [...kudoKeys.all, 'detail', id] as const,
     topValues: () => [...kudoKeys.all, 'top-values'] as const,
+    search: (q: string) => [...kudoKeys.all, 'search', q] as const,
 };
 
 export const useKudo = (id: string) => {
@@ -62,5 +64,21 @@ export const useTopCoreValues = () => {
             const response = await kudoApi.getTopValues();
             return response.data.data;
         }
+    });
+};
+
+export const useSearchKudos = (query: string) => {
+    const debouncedQuery = useDebounce(query, 500);
+
+    return useQuery({
+        queryKey: kudoKeys.search(debouncedQuery),
+        queryFn: async () => {
+            const response = await kudoApi.searchKudos(debouncedQuery);
+            return response.data.data;
+        },
+        enabled: debouncedQuery.trim().length > 2,
+        staleTime: 30_000,
+        refetchOnWindowFocus: false,
+        retry: false,
     });
 };

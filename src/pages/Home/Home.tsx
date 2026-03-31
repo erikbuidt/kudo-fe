@@ -1,17 +1,22 @@
-import { Loader2 } from 'lucide-react'
+import { Loader2, Sparkles, Search } from 'lucide-react'
 import { KudosFeedPost } from '@/components/KudosFeedPost'
-import { useKudos, useTopCoreValues } from '@/hooks/useKudos'
+import { useKudos, useTopCoreValues, useSearchKudos } from '@/hooks/useKudos'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { GiveKudoModal } from '@/components/GiveKudoModal'
 import { useState, useLayoutEffect, useRef, useContext } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { UserContext } from '@/contexts/UserContext'
+import { useSearch } from '@/contexts/SearchContext'
+import { MonthlySummaryWidget } from '@/components/MonthlySummaryWidget'
 
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const scrollPosRef = useRef(0);
+    const { searchQuery } = useSearch();
+    const isSearchActive = searchQuery.trim().length > 2;
+
     const {
         data,
         isLoading,
@@ -21,8 +26,13 @@ export default function Home() {
         isFetchingNextPage
     } = useKudos();
 
-    const { me } = useContext(UserContext)
+    const {
+        data: searchResults,
+        isLoading: isSearching,
+        isFetching: isSearchFetching,
+    } = useSearchKudos(searchQuery);
 
+    const { me } = useContext(UserContext)
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 
     const kudos = data?.pages.flatMap(page => page.data) || [];
@@ -86,44 +96,82 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Feed Posts */}
-                <div className="flex flex-col gap-6 pb-20">
-                    {isLoading ? (
-                        <div className="py-20 flex flex-col items-center justify-center gap-4">
-                            <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
-                            <p className="text-slate-500 font-medium">Crunching kudos...</p>
-                        </div>
-                    ) : isError ? (
-                        <div className="py-20 text-center text-slate-500 font-medium">
-                            Failed to load feed. Refresh to try again.
-                        </div>
-                    ) : kudos.length === 0 ? (
-                        <div className="py-20 text-center text-slate-500 font-medium bg-white rounded-2xl border border-dashed border-slate-200">
-                            No recognition yet. Be the first to give a Kudo!
-                        </div>
-                    ) : (
-                        <>
-                            {kudos.map(kudo => (
-                                <KudosFeedPost key={kudo.id} kudo={kudo} />
-                            ))}
-                            {/* Loading / Pagination Zone */}
-                            <div className="w-full flex flex-col gap-6 py-4">
-                                {isFetchingNextPage && (
-                                    <>
-                                        <SkeletonFeedPost />
-                                    </>
-                                )}
-                                <div ref={loadMoreRef} className="h-1 pointer-events-none" />
+                {/* --- SEARCH RESULTS MODE --- */}
+                {isSearchActive ? (
+                    <div className="flex flex-col gap-6 pb-20">
+                        {/* Search Header */}
+                        <div className="flex items-center gap-2 px-1">
+                            <div className="flex items-center gap-1.5 text-indigo-600">
+                                <Sparkles className="w-4 h-4" />
+                                <span className="text-sm font-semibold">AI Search</span>
                             </div>
-                        </>
-                    )}
-                </div>
+                            <span className="text-slate-400 text-sm">—</span>
+                            <span className="text-sm text-slate-600 italic truncate">"{searchQuery}"</span>
+                            {(isSearching || isSearchFetching) && (
+                                <Loader2 className="w-4 h-4 animate-spin text-indigo-500 ml-auto" />
+                            )}
+                        </div>
+
+                        {isSearching ? (
+                            <>
+                                <SkeletonFeedPost />
+                                <SkeletonFeedPost />
+                            </>
+                        ) : searchResults?.length === 0 ? (
+                            <div className="py-16 flex flex-col items-center justify-center gap-3 text-slate-500 bg-white rounded-2xl border border-dashed border-slate-200">
+                                <Search className="w-8 h-8 text-slate-300" />
+                                <p className="font-medium">No matching Kudos found</p>
+                                <p className="text-sm text-slate-400">Try a different search phrase</p>
+                            </div>
+                        ) : (
+                            searchResults?.map(kudo => (
+                                <KudosFeedPost key={kudo.id} kudo={kudo} />
+                            ))
+                        )}
+                    </div>
+                ) : (
+                    /* --- NORMAL FEED MODE --- */
+                    <div className="flex flex-col gap-6 pb-20">
+                        {isLoading ? (
+                            <div className="py-20 flex flex-col items-center justify-center gap-4">
+                                <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+                                <p className="text-slate-500 font-medium">Crunching kudos...</p>
+                            </div>
+                        ) : isError ? (
+                            <div className="py-20 text-center text-slate-500 font-medium">
+                                Failed to load feed. Refresh to try again.
+                            </div>
+                        ) : kudos.length === 0 ? (
+                            <div className="py-20 text-center text-slate-500 font-medium bg-white rounded-2xl border border-dashed border-slate-200">
+                                No recognition yet. Be the first to give a Kudo!
+                            </div>
+                        ) : (
+                            <>
+                                {kudos.map(kudo => (
+                                    <KudosFeedPost key={kudo.id} kudo={kudo} />
+                                ))}
+                                {/* Loading / Pagination Zone */}
+                                <div className="w-full flex flex-col gap-6 py-4">
+                                    {isFetchingNextPage && (
+                                        <>
+                                            <SkeletonFeedPost />
+                                        </>
+                                    )}
+                                    <div ref={loadMoreRef} className="h-1 pointer-events-none" />
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )}
             </div>
 
             <GiveKudoModal isOpen={isModalOpen} onClose={setIsModalOpen} />
 
-            {/* Right Sidebar WidgetPs */}
+            {/* Right Sidebar Widgets */}
             <div className="w-72 hidden lg:flex flex-col gap-6 shrink-0 sticky top-28">
+
+                {/* Monthly AI Summary Widget */}
+                <MonthlySummaryWidget />
 
                 {/* Top Values Widget */}
                 <div className="bg-white border text-left border-slate-200 rounded-2xl p-6 shadow-sm">

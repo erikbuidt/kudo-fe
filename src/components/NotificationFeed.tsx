@@ -1,5 +1,6 @@
 import { useNotifications, useMarkAsRead } from '../hooks/useNotifications';
-import { useState } from 'react';
+import { useIntersectionObserver } from '../hooks/useIntersectionObserver';
+import { useState, useRef } from 'react';
 import { KudoDetailModal } from './KudoDetailModal';
 
 import { Check, BellRing } from 'lucide-react';
@@ -20,16 +21,18 @@ export function NotificationFeed() {
 
     const [selectedKudoId, setSelectedKudoId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
-    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-        // If user is within 50px of the bottom
-        if (scrollHeight - scrollTop <= clientHeight + 50) {
+    const loadMoreRef = useIntersectionObserver({
+        root: containerRef.current,
+        onIntersect: () => {
             if (hasNextPage && !isFetchingNextPage) {
                 fetchNextPage();
             }
-        }
-    };
+        },
+        enabled: hasNextPage && !isFetchingNextPage,
+        rootMargin: '100px', // Trigger a bit earlier for smoother experience
+    });
 
     if (isLoading) {
         return <div className="p-4 text-center text-slate-500 text-sm">Loading notifications...</div>;
@@ -67,7 +70,7 @@ export function NotificationFeed() {
     return (
         <>
             <div
-                onScroll={handleScroll}
+                ref={containerRef}
                 className="flex flex-col max-h-[400px] overflow-y-auto"
             >
                 {notifications.map((notification) => (
@@ -118,7 +121,7 @@ export function NotificationFeed() {
                 ))}
 
                 {/* Loading indicator for infinite scroll */}
-                <div className="h-10 flex items-center justify-center pt-2 pb-4">
+                <div ref={loadMoreRef} className="h-10 flex items-center justify-center pt-2 pb-4">
                     {isFetchingNextPage && <span className="text-xs text-slate-400">Loading more...</span>}
                     {!hasNextPage && notifications.length > 0 && (
                         <span className="text-xs text-slate-400">You've reached the end</span>

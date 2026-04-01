@@ -3,7 +3,7 @@ import { KudosFeedPost } from '@/components/KudosFeedPost'
 import { useKudos, useTopCoreValues } from '@/hooks/useKudos'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { GiveKudoModal } from '@/components/GiveKudoModal'
-import { useState, useLayoutEffect, useRef, useContext } from 'react'
+import { useState, useContext } from 'react'
 import SkeletonFeedPost from '@/components/SkeletonFeedPost'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { UserContext } from '@/contexts/UserContext'
@@ -11,7 +11,6 @@ import { UserContext } from '@/contexts/UserContext'
 
 export default function Home() {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const scrollPosRef = useRef(0);
     const {
         data,
         isLoading,
@@ -26,23 +25,6 @@ export default function Home() {
     const { data: topValues, isLoading: isLoadingTopValues } = useTopCoreValues();
 
     const kudos = data?.pages.flatMap(page => page.data) || [];
-
-    // Force scroll position to stay still when new items are added
-    useLayoutEffect(() => {
-        if (kudos.length > 0) {
-            window.scrollTo(0, scrollPosRef.current);
-        }
-    }, [kudos.length]);
-
-    const handleScroll = () => {
-        scrollPosRef.current = window.scrollY;
-    };
-
-    useLayoutEffect(() => {
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
     const loadMoreRef = useIntersectionObserver({
         onIntersect: () => {
             if (hasNextPage && !isFetchingNextPage) {
@@ -50,13 +32,14 @@ export default function Home() {
             }
         },
         rootMargin: '600px',
-        threshold: 0
+        threshold: 0,
+        enabled: hasNextPage && !isFetchingNextPage
     });
 
     return (
         <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
             {/* Main Feed Column */}
-            <div className="flex-1 w-full lg:max-w-2xl flex flex-col gap-4 lg:gap-6" style={{ overflowAnchor: 'none' }}>
+            <div className="flex-1 w-full lg:max-w-2xl flex flex-col gap-4 lg:gap-6">
 
                 {/* Compose Box */}
                 <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col gap-4">
